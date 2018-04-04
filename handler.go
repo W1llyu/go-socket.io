@@ -1,7 +1,6 @@
 package socketio
 
 import (
-	"fmt"
 	"reflect"
 	"sync"
 )
@@ -131,8 +130,13 @@ func (h *socketHandler) BroadcastTo(room, event string, args ...interface{}) err
 	return h.baseHandler.broadcast.Send(h.socket, h.broadcastName(room), event, args...)
 }
 
+func (h *baseHandler) Sockets() map[string]map[string]Socket {
+	return h.broadcast.Sockets()
+}
+
 func (h *baseHandler) broadcastName(room string) string {
-	return fmt.Sprintf("%s:%s", h.name, room)
+	//return fmt.Sprintf("%s:%s", h.name, room)
+	return room
 }
 
 func (h *socketHandler) onPacket(decoder *decoder, packet *packet) ([]interface{}, error) {

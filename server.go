@@ -14,13 +14,17 @@ type Server struct {
 }
 
 // NewServer returns the server supported given transports. If transports is nil, the server will use ["polling", "websocket"] as default.
-func NewServer(transportNames []string) (*Server, error) {
+func NewDefaultServer(transportNames []string) (*Server, error) {
+	return NewServer(newBroadcastDefault(), transportNames)
+}
+
+func NewServer(broadcastAdapter BroadcastAdaptor, transportNames []string) (*Server, error) {
 	eio, err := engineio.NewServer(transportNames)
 	if err != nil {
 		return nil, err
 	}
 	ret := &Server{
-		namespace: newNamespace(newBroadcastDefault()),
+		namespace: newNamespace(broadcastAdapter),
 		eio:       eio,
 	}
 	go ret.loop()
@@ -90,6 +94,10 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 // BroadcastTo is a server level broadcast function.
 func (s *Server) BroadcastTo(room, message string, args ...interface{}) {
 	s.namespace.BroadcastTo(room, message, args...)
+}
+
+func (s *Server) Sockets(room string) map[string]Socket {
+	return s.namespace.Sockets()[s.namespace.broadcastName(room)]
 }
 
 func (s *Server) loop() {
