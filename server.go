@@ -6,6 +6,21 @@ import (
 	"time"
 )
 
+type EngineioServer interface {
+	SetPingTimeout(t time.Duration)
+	SetPingInterval(t time.Duration)
+	SetMaxConnection(n int)
+	GetMaxConnection() int
+	Count() int
+	SetAllowRequest(f func(*http.Request) error)
+	SetAllowUpgrades(allow bool)
+	SetCookie(prefix string)
+	SetNewId(f func(*http.Request) string)
+	SetSessionManager(sessions engineio.Sessions)
+	ServeHTTP(w http.ResponseWriter, r *http.Request)
+	Accept() (engineio.Conn, error)
+}
+
 // Server is the server of socket.io.
 type Server struct {
 	*namespace
